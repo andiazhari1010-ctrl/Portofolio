@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens. Single dark theme. The brief defines these exactly. */
+/* ------------------------------------------------------------------ */
+:root {
+  --bg: #050507;
+  --surface: #0d0d12;
+  --surface-2: #13131a;
+  --line: #1a1a24;
+  --ink: #e8e8f0;
+  --muted: #8a8a99;
+  --accent: #0066ff;
+  --accent-bright: #00aaff;
+  --accent-green: #00ff41;
+
+  /* fluid section rhythm: airy by intent (VISUAL_DENSITY 3) */
+  --section-y: clamp(5rem, 11vw, 9rem);
+
+  /* fixed navbar height (see Navbar h-[68px]) + comfortable breathing room.
+     Drives the scroll offset for every anchor target so a section title always
+     lands cleanly below the navbar. Change --nav-h here if the navbar height
+     ever changes and everything stays in sync. */
+  --nav-h: 68px;
+  --scroll-offset: calc(var(--nav-h) + 28px);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Single source of scroll offset for ALL anchor targets (native #hash links
+       and the command palette's scrollIntoView both honor this). Sections must
+       NOT also set scroll-margin-top, or the two would stack and over-shoot. */
+    scroll-padding-top: var(--scroll-offset);
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-feature-settings: "ss01", "cv01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* selection picks up the accent so even small interactions feel intentional */
+  ::selection {
+    background: rgba(0, 102, 255, 0.28);
+    color: #ffffff;
+  }
+
+  /* one focus language across the whole page: an acid-green ring */
+  :focus-visible {
+    outline: 2px solid var(--accent-green);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* respect users who ask the OS for less motion */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* page shell: consistent horizontal gutters + max width */
+  .shell {
+    @apply mx-auto w-full max-w-shell px-5 sm:px-8;
+  }
+
+  /* the single recurring surface: a 1px faint-gradient bordered panel.
+     The gradient border is drawn with a masked pseudo-element so the
+     real border-radius is preserved and nothing bleeds. */
+  .panel {
+    position: relative;
+    background-color: var(--surface);
+    border-radius: theme("borderRadius.card");
+  }
+  .panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(26, 26, 36, 0.2) 38%,
+      rgba(0, 102, 255, 0.18)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* on hover the border gradient leans into the electric blue */
+  .panel-interactive:hover::before {
+    background: linear-gradient(
+      140deg,
+      rgba(0, 170, 255, 0.55),
+      rgba(0, 102, 255, 0.25) 55%,
+      rgba(0, 102, 255, 0.4)
+    );
+  }
+
+  /* the one accent gradient, used sparingly on a single word / mark */
+  .text-gradient {
+    background: linear-gradient(100deg, var(--accent-bright), var(--accent) 70%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@layer utilities {
+  /* fixed, pointer-events-none texture layer. Grid + scanlines at ~4%.
+     Kept on a fixed element so it never repaints during scroll. */
+  .texture-overlay {
+    background-image:
+      linear-gradient(rgba(232, 232, 240, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232, 232, 240, 0.04) 1px, transparent 1px),
+      repeating-linear-gradient(
+        0deg,
+        rgba(232, 232, 240, 0.025) 0px,
+        rgba(232, 232, 240, 0.025) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+    background-size:
+      64px 64px,
+      64px 64px,
+      100% 3px;
+    /* fade the grid toward the edges so it reads as atmosphere, not a wireframe */
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 35%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 35%, transparent 100%);
+  }
+
+  /* hairline used to separate divided rows (skills) without heavy borders */
+  .hairline {
+    background: linear-gradient(90deg, var(--line), transparent 85%);
+  }
+}
