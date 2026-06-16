@@ -33,3 +33,6 @@ next-env.d.ts
 # agent tooling
 /.agents
 skills-lock.json
+
+# local build artifacts (deploy archives)
+*.tar.gz
